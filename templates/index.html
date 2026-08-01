@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Bates Stamping Application</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        .flash { padding: 1em; margin: 1em 0; border: 1px solid #ccc; }
+        .flash.error { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .flash:not(.error) { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+    </style>
+</head>
+<body>
+    <h1>Upload Bates Stamping Manifest</h1>
+    <p>Select the Excel manifest file (e.g., <code>Bates_Stamping_Index_Template.xlsx</code>) to begin the stamping process.</p>
+    <p>Stamped documents will be saved in the <code>stamped_documents</code> directory.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Upload and Process>
+    </form>
+</body>
+</html>
