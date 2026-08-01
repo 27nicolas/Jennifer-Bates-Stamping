@@ -2,18 +2,20 @@
 
 ## Overview
 
-A simple web application to apply Bates stamping to PDF documents. Bates stamping is the process of assigning unique, sequential identifiers to each page of a document to ensure accurate organization and tracking.
+A simple desktop application to apply Bates stamping to PDF documents. Bates stamping is the process of assigning unique, sequential identifiers to each page of a document to ensure accurate organization and tracking.
 
-This application provides a web interface to upload an Excel manifest file. The manifest lists the documents to be stamped. The application then processes each document, adding a unique Bates number to the bottom-right corner of every page.
+This application provides a graphical user interface (GUI) to:
+1.  Automatically scan your computer for PDF files to generate an Excel manifest.
+2.  Upload an Excel manifest file that lists the documents to be stamped.
 
-It also includes a helper script to automatically scan your computer for PDF files and generate a manifest for you.
+The application then processes each document, adding a unique Bates number to the bottom-right corner of every page.
 
 ## Features
-- Web-based interface for easy use.
+- Simple graphical user interface for ease of use.
+- Utility to automatically create a manifest file by scanning for PDFs.
 - Processes documents based on an Excel manifest.
 - Applies sequential Bates numbers across all pages of all documents.
 - Saves stamped documents to a separate output directory (`stamped_documents`).
-- Includes a utility to automatically create a manifest file.
 
 ## Installation
 
@@ -25,47 +27,42 @@ It also includes a helper script to automatically scan your computer for PDF fil
 3.  **Install required Python libraries:**
     Open your terminal or command prompt and run the following command to install the necessary dependencies:
     ```bash
-    pip install Flask pandas pypdf reportlab
+    pip install pandas pypdf reportlab
     ```
 
 ## How to Use
 
 ### Step 1: Prepare the Manifest File
 
-You have two options for creating the manifest file:
+You can create the manifest file in two ways: automatically using the application, or manually.
 
-**Option A: Automatically Generate a Manifest**
+**Option A: Automatically Generate a Manifest (Recommended)**
 
-A helper script is included to find PDF files on your computer and create a manifest.
-
-1.  Run the script from your terminal:
-    ```bash
-    python create_manifest.py
-    ```
-2.  This will create a file named `new_bates_manifest.xlsx` in the project directory. This file will contain paths to PDF files found on your machine. You can review and edit this file as needed.
+1.  Run the application (see Step 2).
+2.  Click the "Find PDFs and Create Manifest" button.
+3.  A dialog will appear asking you to select a folder. The application will then scan the selected folder and its subfolders for PDF files to create `new_bates_manifest.xlsx` in the project directory. The file will be automatically selected for processing.
 
 **Option B: Manually Create a Manifest**
 
-1.  Create an Excel file (e.g., `Bates_Stamping_Index_Template.xlsx`).
-2.  This file must contain two columns:
+1.  Create an Excel file (e.g., `manifest.xlsx`).
+2.  The file must contain two columns:
     - `File Path`: The full, absolute path to the PDF document you want to stamp.
     - `Bates Prefix`: The text prefix for the Bates number (e.g., "DOC", "CASE001").
 
-### Step 2: Run the Web Application
+### Step 2: Run the Application
 
 1.  Navigate to the project directory in your terminal.
-2.  Start the web server by running:
+2.  Start the application by running:
     ```bash
-    python app.py
+    python gui_app.py
     ```
-3.  You will see output indicating that the server is running on `http://127.0.0.1:5000`.
+3.  The application window will open.
 
 ### Step 3: Process Your Documents
 
-1.  Open your web browser and go to `http://127.0.0.1:5000`.
-2.  Click the "Choose File" or "Browse" button and select your Excel manifest file (e.g., `new_bates_manifest.xlsx`).
-3.  Click "Upload and Process".
-4.  The application will begin stamping the documents. You will see status messages on the web page upon completion.
+1.  If you didn't use the automatic creation tool, click "Select Manifest File (.xlsx)" and choose your manifest.
+2.  Click "Upload and Process".
+3.  The application will begin stamping the documents. You can monitor the progress in the "Processing Log" window. You will see a final status message upon completion.
 
 ### Step 4: Find Your Stamped Files
 
