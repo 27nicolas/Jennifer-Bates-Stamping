@@ -51,12 +51,15 @@ You can create the manifest file in two ways: automatically using the applicatio
 
 ### Step 2: Run the Application
 
-1.  Navigate to the project directory in your terminal.
-2.  Start the application by running:
+**On Windows:**
+Simply double-click the `start.bat` file located in the project directory. This will launch the application window.
+
+**On macOS / Linux (or as an alternative):**
+1.  Open your terminal or command prompt and navigate to the project directory.
+2.  Run the following command:
     ```bash
     python gui_app.py
     ```
-3.  The application window will open.
 
 ### Step 3: Process Your Documents
 

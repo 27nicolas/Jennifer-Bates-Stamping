@@ -21,7 +21,7 @@ def create_stamp_pdf(page_width, page_height, bates_number):
     packet.seek(0)
     return PdfReader(packet)
 
-def apply_bates_stamping(manifest_path, output_dir):
+def apply_bates_stamping(manifest_path, output_dir, progress_callback=None):
     """
     Reads a manifest file and applies Bates stamping to the specified PDFs.
     """
@@ -29,6 +29,7 @@ def apply_bates_stamping(manifest_path, output_dir):
     processed_files = []
     errors = []
     bates_counter = 1
+    total_files = len(df)
 
     for index, row in df.iterrows():
         # Aggressively clean the file path to remove non-printable characters and normalize it.
@@ -50,6 +51,11 @@ def apply_bates_stamping(manifest_path, output_dir):
             reader = PdfReader(source_path)
             writer = PdfWriter()
 
+            # Check if the PDF is encrypted. If so, we cannot process it without a password.
+            if reader.is_encrypted:
+                errors.append(f"Could not process {source_path}: File is encrypted and password-protected.")
+                continue
+
             for i, page in enumerate(reader.pages):
                 bates_number = f"{bates_prefix}{bates_counter:06d}"
                 stamp_pdf = create_stamp_pdf(page.mediabox.width, page.mediabox.height, bates_number)
@@ -66,5 +72,9 @@ def apply_bates_stamping(manifest_path, output_dir):
             processed_files.append(output_filename)
         except Exception as e:
             errors.append(f"Could not process {source_path}: {e}")
+
+        # Call callback after each row is attempted
+        if progress_callback:
+            progress_callback(index + 1, total_files)
 
     return processed_files, errors

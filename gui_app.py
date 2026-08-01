@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog, messagebox, scrolledtext
+from tkinter import ttk, filedialog, messagebox, scrolledtext
 import os
 import threading
 
@@ -12,7 +12,7 @@ class BatesStamperApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Jennifer Bates Stamping")
-        self.root.geometry("600x450")
+        self.root.geometry("600x480")
 
         self.manifest_path = tk.StringVar()
 
@@ -34,8 +34,12 @@ class BatesStamperApp:
         self.manifest_label.pack(pady=5)
         self.manifest_path.set("No manifest file selected.")
 
-        process_btn = tk.Button(process_frame, text="Upload and Process", command=self.run_processing)
-        process_btn.pack(pady=10)
+        self.process_btn = tk.Button(process_frame, text="Upload and Process", command=self.run_processing)
+        self.process_btn.pack(pady=10)
+
+        # Add progress bar
+        self.progress_bar = ttk.Progressbar(process_frame, orient='horizontal', length=100, mode='determinate')
+        self.progress_bar.pack(pady=5, fill='x', padx=5)
 
         # --- Output/Log Section ---
         log_frame = tk.LabelFrame(root, text="Processing Log", padx=10, pady=10)
@@ -102,7 +106,19 @@ class BatesStamperApp:
             messagebox.showerror("Error", f"Manifest file not found:\n{manifest}")
             return
 
+        # Disable button and reset progress bar
+        self.process_btn.config(state='disabled')
+        self.progress_bar['value'] = 0
+        self.root.update_idletasks()
+
         threading.Thread(target=self.process_files, args=(manifest,), daemon=True).start()
+
+    def update_progress(self, current, total):
+        """Callback to update the progress bar from a thread."""
+        if total > 0:
+            percentage = (current / total) * 100
+            self.progress_bar['value'] = percentage
+            self.root.update_idletasks()
 
     def process_files(self, manifest_path):
         self.log("Starting Bates stamping process...")
@@ -111,15 +127,28 @@ class BatesStamperApp:
                 os.makedirs(STAMPED_FOLDER)
                 self.log(f"Created output directory: {STAMPED_FOLDER}")
 
-            processed_files, errors = apply_bates_stamping(manifest_path, STAMPED_FOLDER)
+            # Define a thread-safe callback
+            def progress_callback(current, total):
+                self.root.after(0, self.update_progress, current, total)
+
+            processed_files, errors = apply_bates_stamping(
+                manifest_path,
+                STAMPED_FOLDER,
+                progress_callback=progress_callback
+            )
             
             self.root.after(0, self.show_processing_results, processed_files, errors)
 
         except Exception as e:
             self.log(f"An error occurred during processing: {e}")
             self.root.after(0, lambda: messagebox.showerror("Processing Error", f"An unexpected error occurred: {e}"))
+            # Re-enable button on error
+            self.root.after(0, lambda: self.process_btn.config(state='normal'))
 
     def show_processing_results(self, processed_files, errors):
+        # Re-enable the button
+        self.process_btn.config(state='normal')
+
         success_msg = f"Successfully stamped {len(processed_files)} files."
         self.log(success_msg)
 
@@ -130,6 +159,8 @@ class BatesStamperApp:
                 self.log(f"ERROR: {error}")
             messagebox.showwarning("Processing Complete with Errors", f"{success_msg}\n\n{error_summary}\n\nSee log for details.")
         else:
+            # Set progress to 100 on full success
+            self.progress_bar['value'] = 100
             messagebox.showinfo("Success", f"{success_msg}\n\nStamped files are in the '{STAMPED_FOLDER}' directory.")
         
         self.log("Processing complete.")
